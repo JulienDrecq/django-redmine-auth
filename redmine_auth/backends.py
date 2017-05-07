@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.conf import settings
 from redmine_auth.models import RedmineUser
 from redmine_auth.settings import *
 from redmine import Redmine
@@ -12,7 +13,11 @@ class RedmineBackend(object):
     def authenticate(self, username=None, password=None):
         user = None
         try:
-            redmine_user = Redmine(REDMINE_SERVER_URL, username=username, password=password).auth()
+            redmine = Redmine(settings.REDMINE_SERVER_URL, username=username, password=password)
+            redmine_user = redmine.user.get("current", include="memberships")
+            if not self._check_redmine_project(redmine, redmine_user):
+                logger.error('Exeption with Redmine authentificate. User does not belong to specified groups.')
+                return None
             try:
                 django_redmine_user = RedmineUser.objects.get(redmine_user_id=redmine_user.id)
                 if django_redmine_user.username != username:
@@ -55,3 +60,17 @@ class RedmineBackend(object):
             # email address can be hidden
             pass
         return has_changed
+
+    def _check_redmine_project(self, redmine, redmine_user):
+        authz_projects = getattr(settings, "REDMINE_AUTHZ_PROJECTS", None)
+        if authz_projects is None:
+            # Don't use project authorization
+            return True
+
+        for membership in redmine_user.memberships:
+            project_id = membership.project.id
+            project_alphabet_identifier = redmine.project.get(project_id).identifier
+            if project_alphabet_identifier in authz_projects:
+                return True
+
+        return False
