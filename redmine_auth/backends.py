@@ -19,8 +19,11 @@ class RedmineBackend(object):
                     django_redmine_user.username = username
                     django_redmine_user.save()
                 user = django_redmine_user.user
+                if self._refresh_user(redmine_user, user):
+                    user.save()
             except RedmineUser.DoesNotExist:
                 user, created = User.objects.get_or_create(username=username)
+                self._refresh_user(redmine_user, user)
                 user.save()
                 django_redmine_user = RedmineUser(user=user, username=username, redmine_user_id=redmine_user.id)
                 django_redmine_user.save()
@@ -35,3 +38,20 @@ class RedmineBackend(object):
         except RedmineUser.DoesNotExist:
             logger.error('No Redmine user identified with id : %s' % user_id)
             return None
+
+    def _refresh_user(self, redmine_user, user):
+        has_changed = False
+        if user.first_name != redmine_user.firstname:
+            user.first_name = redmine_user.firstname
+            has_changed = True
+        if user.last_name != redmine_user.lastname:
+            user.last_name = redmine_user.lastname
+            has_changed = True
+        try:
+            if user.email != redmine_user.mail:
+                user.email = redmine_user.mail
+                has_changed = True
+        except ResourceAttrError:
+            # email address can be hidden
+            pass
+        return has_changed
