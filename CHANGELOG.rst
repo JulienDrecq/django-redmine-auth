@@ -1,7 +1,7 @@
 Changelog
 =========
 
-1.0.1 (2017-05-07)
+1.1 (2017-05-07)
 ------------------
 #. Sets Redmine user information to built-in User model.
    - username
