@@ -61,3 +61,8 @@ Quick start
    add REDMINE_AUTHZ_PROJECTS to your ``settings.py``  like this::
 
     REDMINE_AUTHZ_PROJECTS = ('test-proj',)
+    
+Contributors
+-----------
+   * Julien Drecq ( https://github.com/JulienDrecq/ )
+   * eisin ( https://github.com/eisin )
