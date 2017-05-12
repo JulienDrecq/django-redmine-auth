@@ -5,7 +5,7 @@
 Django app for **Redmine** authentication.
 
 
-Application development and testing with django v1.7.5
+Application development and testing with django v1.10, Redmine v3.3.1
 
 
 .. contents:: Contents
@@ -49,3 +49,15 @@ Quick start
 
     {{ user.redmineuser.redmine_user_id }}
     {{ user.redmineuser.username }}
+
+7. Also accessing built-in model ``User`` can be used.
+
+    {{ user.username }} -- equals to user.redmineuser.username
+    {{ user.first_name }}
+    {{ user.last_name }}
+    {{ user.email }} -- may be blank, depend on personal settings
+
+8. (Optional) For allowing users which belong to specified projects,
+   add REDMINE_AUTHZ_PROJECTS to your ``settings.py``  like this::
+
+    REDMINE_AUTHZ_PROJECTS = ('test-proj',)
